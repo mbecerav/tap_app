@@ -1,0 +1,232 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Taptry</title>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/css/index_form.css" />
+        <link rel="stylesheet" type="text/css" href="/css/statistics.css" />
+        <script src="/js/index_submit.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    </head>
+    <body>
+
+        <form id="applicantForm" method="post" action="sendAddAppForm()" onsubmit="return false;" >
+
+            <h1>Add Applicant</h1>
+
+            <fieldset>
+
+                <legend><span class="number">1</span> Applicant score</legend>
+                <div th:each="subject : ${subjects}">
+                    <label for="name"  th:text="${subject.name}" ></label>
+                    <input type="hidden" th:id="subject+${subject.id}" th:name="subject+${subject.id}" th:value="${subject.id}" />
+                    <select th:id="score+${subject.id}" th:name="score+${subject.id}" required>
+                        <option th:each="number : ${#numbers.sequence(0, 100)}" th:value="${number}" th:text="${number}" ></option>
+                    </select>
+                </div>
+
+            </fieldset>
+
+            <fieldset>
+
+                <legend><span class="number">2</span> Category</legend>
+
+                <label for="job">Category:</label>
+                <select id="category" name="category" >   
+                    <optgroup label="Category" >
+                        <option th:each="category : ${categories}" th:value="${category.id}"  th:text="${category.name}" th:id="${category.id}" th:name="${category.id}" ></option>
+                    </optgroup>
+                </select>
+
+            </fieldset>
+            <br />
+            <button type="submit" onclick="sendAddAppForm()" >Add</button>
+
+        </form>
+        
+        
+        
+       <br /><br /><br /><br />
+       
+       
+       <form id="subjectsForm" method="post" action="sendForm()" onsubmit="return false;" >
+
+            <h1>Modify Subjects</h1>
+
+            <fieldset>
+                
+                <div class="rowForm">
+                    <div class="columnForm">
+                
+                        <legend>Subject</legend>
+                        <div th:each="subject : ${subjects}">
+                            <input type="text" th:id="subject+${subject.id}" th:name="subject+${subject.id}" th:value="${subject.name}" th:disabled="true" />
+                        </div>
+                
+                    </div>
+                    <div class="columnForm">
+                        
+                        <legend>Category</legend>
+                        <div th:each="subject : ${subjects}">
+                            <select th:id="${subject.id}" name="subject-category" onchange="updateSubjectCategory(this.id)">   
+                                <optgroup label="Category" >
+                                    <option th:each="category : ${categories}" th:value="${category.id}"  th:text="${category.name}" th:id="${category.id}" th:name="${category.id}" th:selected="${subject.categoryId} == ${category.id}" >
+                                    </option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        
+                    </div>
+                    <div class="right">                        
+                        <legend> _ </legend>  
+                        <div th:each="subject : ${subjects}">
+                            <i class="material-icons" style="font-size:38px;" th:id="${subject.id}" onclick="deleteSubject(this.id)">delete</i>
+                        </div>
+                    </div>
+                    
+                </div>
+
+            </fieldset>
+
+            <button type="submit" onclick="sendForm()" >New</button>
+
+        </form>
+        
+        
+        
+       <br /><br /><br /><br />
+       
+       
+       <form id="categoriesForm" method="post" action="sendForm()" onsubmit="return false;" >
+
+            <h1>Modify Categories</h1>
+
+            <fieldset>
+                
+                <div class="rowForm">
+                    <div class="left">
+                
+                        <legend>Category</legend>
+                        <div th:each="category : ${categories}">
+                            <input th:if="${not #strings.isEmpty(category.id)}" type="text" th:id="cat+${category.id}" th:name="cat+${category.id}" th:value="${category.name}" th:disabled="true" />
+                        </div>
+                
+                    </div>
+                    <div class="right">                        
+                        <legend> _ </legend>  
+                        <div th:if="${not #strings.isEmpty(category.id)}" th:each="category : ${categories}">
+                            <i class="material-icons" style="font-size:38px;" th:id="${category.id}" onclick="deleteCategory(this.id)">delete</i>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+
+            </fieldset>
+
+            <button data-toggle="modal" data-target="#newCategoryModal" >New</button>
+
+        </form>
+        
+        
+        
+       <br /><br /><br /><br />
+       
+       
+       <form id="updateEvalForm" method="post" action="sendUpdateForm()" onsubmit="return false;" >
+
+            <h1>Statistics</h1>
+
+            <table class="comicGreen">
+                <thead>
+                    <tr>
+                        <th>Pass</th>
+                        <th>Fail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="pass" >0</td>
+                        <td id="fails" >0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br/>
+            <div id="myChart" style="width:100%; max-width:600px; height:500px;">
+            </div>
+            <button type="submit" onclick="sendUpdateForm()" >Update</button>
+
+        </form>
+       
+       
+  <!-- Modal -->
+  <div class="modal fade" id="newCategoryModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header" >      
+            <h4 class="modal-title">Add New Category</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="width: 10% !important;">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+          <form id="newCategoryForm" method="post" action="addCategory()" onsubmit="return false;" >
+            <div class="form-group">
+                <label for="recipient-name" class="col-form-label">> Category Id:</label>
+                <select id="category-id" name="category-id" >   
+                  <optgroup label="Category" >
+                      <option th:each="availableCategories : ${availableCategories}" th:value="${availableCategories}"  th:text="${availableCategories}" ></option>
+                  </optgroup>
+                </select>
+            </div>
+            <div class="form-group">
+              <label for="recipient-name" class="col-form-label">> Name:</label>
+              <input type="text" class="form-control" id="category-name" name="category-name" required>
+            </div>
+            <div class="form-group">
+                <label for="recipient-name" class="col-form-label">> Minimum Score:</label>
+                <input type="number" id="category-score" name="category-score" min="0" max="1000" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" onclick="addCategory()" data-dismiss="modal">Add</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+       
+       <script>
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            const data = google.visualization.arrayToDataTable([
+              ['Status', 'Applicants'],
+              ['Pass', parseInt(document.getElementById("pass").innerHTML)],
+              ['Fail',parseInt(document.getElementById("fails").innerHTML)]
+            ]);
+
+            const options = {
+              title:'TAP Applicants rate',
+              is3D:true
+        };
+
+        const chart = new google.visualization.PieChart(document.getElementById('myChart'));
+          chart.draw(data, options);
+        }
+        </script>
+
+    </body>
+</html>
